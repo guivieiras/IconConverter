@@ -1,0 +1,47 @@
+﻿<Window x:Class="IconConverter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local ="clr-namespace:IconConverter"
+        Title="Icon Converter" 
+        Height="400" Width="700"
+        AllowDrop="True" 
+        Icon="Resources/convertIconMerged.ico" 
+        KeyDown="Window_KeyDown" MouseLeftButtonUp="window_MouseLeftButtonUp" Drop="Window_Drop" 
+        MinHeight="100" MinWidth="250">
+    
+    <Grid x:Name="grid1">
+        <Border x:Name="bord" BorderThickness="2" BorderBrush="Red" Margin="0,30,0,0" HorizontalAlignment="Center"  VerticalAlignment="Top" >
+            <Grid   x:Name="pictureGrid">
+                <Image x:Name="pictureBox" MouseLeftButtonDown="pictureBox_MouseLeftButtonDown" MouseLeftButtonUp="window_MouseLeftButtonUp" MouseMove="pictureBox_MouseMove" HorizontalAlignment="Left" Height="100" VerticalAlignment="Top" Width="100"/>
+            </Grid>
+        </Border>
+        <Menu BorderBrush="#0078d7" Background="White" BorderThickness="0,0,0,1" x:Name="menu" HorizontalAlignment="Stretch" Height="20" VerticalAlignment="Top">
+
+            <MenuItem Header="Open File" Click="btn_OpenFile_Click" />
+            <MenuItem Header="Export">
+
+                <local:CCheckBox x:Name="cb256" Margin="-29,0,0,0" Content="  256x256" Dimension="256"  IsChecked="True"/>
+                <local:CCheckBox x:Name="cb128" Margin="-29,0,0,0" Content="  128x128" Dimension="128" />
+                <local:CCheckBox x:Name="cb64" Margin="-29,0,0,0" Content="  64x64" Dimension="64" />
+                <local:CCheckBox x:Name="cb48" Margin="-29,0,0,0" Content="  48x48" Dimension="48" />
+                <local:CCheckBox x:Name="cb32" Margin="-29,0,0,0" Content="  32x32" Dimension="32" />
+                <local:CCheckBox x:Name="cb16" Margin="-29,0,0,0" Content="  16x16" Dimension="16" />
+
+                <Separator/>
+
+                <MenuItem Header="Crop and Save" Click="btn_CropAndSave_Click"/>
+                <MenuItem Header="Save whole image as icon" Click="btn_SaveWithoutCrop_Click"/>
+
+            </MenuItem>
+            <MenuItem Header="Merge">
+                <MenuItem Header="Merge as PNG (Recomended)" Click="btn_MergeIntoPNG_Click"/>
+                <MenuItem Header="Merge as BMP" Click="btn_MergeIntoBMP_Click"/>
+            </MenuItem>
+
+        </Menu>
+
+
+
+
+    </Grid>
+</Window>

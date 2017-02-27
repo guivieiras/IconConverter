@@ -1,0 +1,262 @@
+    private void btn_DeprecatedMerge_Click(object sender, RoutedEventArgs e) //Mesma merda q a de cima
+        {
+            MagickImage ico256 = new MagickImage("32Icon256.ico");
+            MagickImage ico64 = new MagickImage("32Icon64.ico");
+            MagickImage ico48 = new MagickImage("32Icon48.ico");
+            MagickImage ico32 = new MagickImage("32Icon32.ico");
+            MagickImage ico16 = new MagickImage("32Icon16.ico");
+
+            DeprecatedConverter dec = new DeprecatedConverter();
+            dec.list.Add(ico256.ToBitmap());
+            dec.list.Add(ico64.ToBitmap());
+            dec.list.Add(ico48.ToBitmap());
+            dec.list.Add(ico32.ToBitmap());
+            dec.list.Add(ico16.ToBitmap());
+            dec.Save("Test.ico");
+
+        }
+
+        /*   <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding IsSelected}"
+                       Width="20" />
+                        <TextBlock Text="{Binding Content}"
+                       Padding="0,0,0,2"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>*/
+			
+			/////////////////////////////////////////////////////
+			
+			
+			using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace IconConverter.IconEx
+{
+    class DeprecatedConverter
+    {
+        public List<Image> list = new List<Image>();
+
+        IconEx ex = new IconEx();
+        public void SaveEWEREQW()
+        {
+            FileStream fs = new FileStream("banana.ico", FileMode.Create, FileAccess.Write, FileShare.Read);
+            BinaryWriter bw = new BinaryWriter(fs);
+
+            var imageData = new Dictionary<IconConverter.IconEx.IconEx.ICONDIRENTRY, byte[]>();
+
+
+            Int16 idReserved = 0;
+            bw.Write(idReserved);
+            Int16 idType = 1;
+            bw.Write(idType);
+            Int16 idCount = (Int16)list.Count;
+            bw.Write(idCount);
+
+            int iconOffset = 6 + 16 * list.Count;
+
+            foreach (Image idi in list)
+            {
+                // idi.IconImageDataBytes();
+
+                var image = idi as Bitmap;
+                ImageConverter a = new ImageConverter();
+                var data = (byte[])a.ConvertTo(image, typeof(byte[]));
+
+                int bytesInRes = data.Length;
+
+                IconConverter.IconEx.IconEx.ICONDIRENTRY ide = new IconConverter.IconEx.IconEx.ICONDIRENTRY();
+                ide.width = (byte)idi.Size.Width;
+                ide.height = (byte)idi.Size.Height;
+
+                ide.colorCount = 0;
+                ide.wBitCount = 32;
+                ide.wPlanes = 1;
+
+                ide.dwBytesInRes = bytesInRes;
+                ide.dwImageOffset = iconOffset;
+                ide.Write(bw);
+
+                imageData[ide] = data;
+
+                iconOffset += bytesInRes;
+            }
+
+            foreach (var kvp in imageData)
+            {
+                bw.Seek(kvp.Key.dwImageOffset, SeekOrigin.Begin);
+                bw.Write(kvp.Value);
+            }
+
+        }
+
+
+        public void Save(string iconFile)
+        {
+            // open the file for writing, truncate if exists
+            FileStream fs = new FileStream(iconFile, FileMode.Create, FileAccess.Write, FileShare.Read);
+            BinaryWriter bw = null;
+
+            bw = new BinaryWriter(fs);
+
+            // write out the icon header:
+            writeIconFileHeader(bw);
+
+            var imageData = new Dictionary<IconConverter.IconEx.IconEx.ICONDIRENTRY, byte[]>();
+
+
+            // write out the icon directory entries:
+            int iconOffset = 6 + 16 * list.Count;
+            byte[] data = null;
+            foreach (Image idi in list)
+            {
+                var image = idi as Bitmap;
+                ImageConverter a = new ImageConverter();
+
+                data = (byte[])a.ConvertTo(image, typeof(byte[]));
+
+                int bytesInRes = data.Length;
+
+                IconConverter.IconEx.IconEx.ICONDIRENTRY ide = new IconConverter.IconEx.IconEx.ICONDIRENTRY();
+
+                ide.width = (byte)idi.Size.Width;
+                ide.height = (byte)idi.Size.Height;
+
+                ide.colorCount = 0;
+                ide.wBitCount = 32;
+
+                ide.wPlanes = 1;
+                ide.dwBytesInRes = bytesInRes;
+                ide.dwImageOffset = iconOffset;
+                ide.Write(bw);
+
+                imageData[ide] = data;
+
+                iconOffset += bytesInRes;
+            }
+            Console.WriteLine(bw.BaseStream.Length);
+
+
+            // write out the icon data:
+            foreach (var kvp in imageData)
+            {
+                bw.Write(kvp.Value, 0, kvp.Value.Length);
+            }
+
+
+            bw.Close();
+
+        }
+        public void ComIconexBytes()
+        {
+            var imageData = new Dictionary<int, byte[]>();
+            ImageConverter a = new ImageConverter();
+
+            imageData[1] = (byte[])a.ConvertTo(list[1], typeof(byte[]));
+            imageData[2] = (byte[])a.ConvertTo(list[0], typeof(byte[]));
+
+            File.Create("IconFileWriter.ico").Close();
+            FileStream fs = new FileStream("IconFileWriter.ico", FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
+
+            BinaryWriter bw = new BinaryWriter(fs);
+
+
+
+            int ofset = 38;
+            bw.Seek(ofset, SeekOrigin.Begin);
+            foreach (var kvp in imageData)
+            {
+               
+            //    bw.Write(kvp.Value, 0, kvp.Value.Length);
+            }
+            bw.Close();
+        }
+
+
+        byte[] data = null;
+
+        public void SaveIconBitmapData(BinaryWriter bw)
+        {
+           
+        }
+        private void writeIconFileHeader(BinaryWriter bw)
+        {
+            Int16 idReserved = 0;
+            bw.Write(idReserved);
+            Int16 idType = 1;
+            bw.Write(idType);
+            Int16 idCount = (Int16)this.list.Count;
+            bw.Write(idCount);
+
+            Console.WriteLine(string.Format("{0} {1} {2} Guilherme", idReserved, idType, idCount));
+        }
+
+    }
+
+
+}
+
+////////////////////////////////
+
+  #region Deprecated
+          static string getIconNameFromFilename(string fileName, int dimension) {
+            return $"{Path.GetFileNameWithoutExtension(fileName)}_{dimension}.ico";
+        }
+        public static Bitmap resizeImage(Bitmap imgToResize, System.Drawing.Size size) {
+            return (new Bitmap(imgToResize, size));
+        }
+
+        public static Bitmap ResizeImage(Bitmap imgToResize, System.Drawing.Size size) {
+            Bitmap b = new Bitmap(size.Width, size.Height);
+
+            using (Graphics g = Graphics.FromImage((System.Drawing.Image)b)) {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Default;
+                g.DrawImage(imgToResize, 0, 0, size.Width, size.Height);
+            }
+            return b;
+        }
+
+
+        static void wtf(int resolution) {
+            //byte[] fs = File.ReadAllBytes(string.Format("Icon_{0}.png", resolution));
+            //byte[] l = INT2LE((int)fs.Length);
+            //byte[] bs = { 00, 00, 01, 00, 01, 00, (byte)res, (byte)res, 00, 00, 01, 00, 32, 00, l[0], l[1], l[2], l[3], 22, 00, 00, 00 };
+
+            //File.WriteAllBytes(string.Format("XIcon_{0}.ico", resolution), InsertBytes(fs, bs));
+        }
+        static byte[] INT2LE(int data) {
+            byte[] b = new byte[4];
+            b[0] = (byte)data;
+            b[1] = (byte)(((uint)data >> 8) & 0xFF);
+            b[2] = (byte)(((uint)data >> 16) & 0xFF);
+            b[3] = (byte)(((uint)data >> 24) & 0xFF);
+            return b;
+        }
+        static public byte[] InsertBytes(byte[] arquivo, byte[] header) {
+            var toreturn = new byte[arquivo.Length + header.Length];
+
+            int i = 0;
+            for (; i < header.Length; i++) {
+                toreturn[i] = header[i];
+            }
+
+
+            for (int z = 0; z < arquivo.Length; z++) {
+                toreturn[i++] = arquivo[z];
+            }
+
+
+            return toreturn;
+        }
+
+       
+        #endregion
