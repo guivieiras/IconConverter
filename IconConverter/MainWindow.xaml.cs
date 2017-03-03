@@ -35,7 +35,7 @@ namespace IconConverter {
             Directory.CreateDirectory(dir);
             Directory.SetCurrentDirectory(dir);
 
-            SizeChanged += updateScale;
+            SizeChanged += WindowSizeChanged;
         }
       
         void loadImage(string fileName) {
@@ -45,13 +45,7 @@ namespace IconConverter {
             MagickImage image = new MagickImage(fileName);
             loadedImage = image;
 
-            scale = grid1.ActualWidth / loadedImage.Width;
-
-            if (scale * loadedImage.Height > grid1.ActualHeight - bord.Margin.Top)
-                scale = (grid1.ActualHeight - bord.Margin.Top) / loadedImage.Height;
-
-            pictureBox.Height = loadedImage.Height * scale;
-            pictureBox.Width = loadedImage.Width * scale;
+            updateScale();
 
             pictureBox.Source = image.ToBitmapSource();
         }
@@ -61,13 +55,16 @@ namespace IconConverter {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void updateScale(object sender, SizeChangedEventArgs e) {
+        private void WindowSizeChanged(object sender, SizeChangedEventArgs e) => updateScale();
+          
+        void updateScale() {
             if (loadedImage != null) {
+                pictureGrid.Children.Remove(rect);
 
-                scale = grid1.ActualWidth / loadedImage.Width;
+                scale = (grid1.ActualWidth - 10) / loadedImage.Width;
 
-                if (scale * loadedImage.Height > grid1.ActualHeight - bord.Margin.Top)
-                    scale = (grid1.ActualHeight - bord.Margin.Top) / loadedImage.Height;
+                if (scale * loadedImage.Height > grid1.ActualHeight - bord.Margin.Top - 10)
+                    scale = (grid1.ActualHeight - bord.Margin.Top - 10) / loadedImage.Height;
 
                 pictureBox.Height = loadedImage.Height * scale;
                 pictureBox.Width = loadedImage.Width * scale;
@@ -92,12 +89,15 @@ namespace IconConverter {
         }
 
         private void btn_CropAndSave_Click(object sender, RoutedEventArgs e) {
-            foreach (var cb in checkBoxes) {
-                if (cb.IsChecked.Value) {
-                    ImageOperations.CropAndSave(loadedImageFilename, cb.Dimension, rect, scale, pictureBox);
+
+            if (rect != null && pictureGrid.Children.Contains(rect)) {
+                foreach (var cb in checkBoxes) {
+                    if (cb.IsChecked.Value) {
+                        ImageOperations.CropAndSave(loadedImage, loadedImageFilename, cb.Dimension, rect, scale, pictureBox);
+                    }
                 }
-            }
-            Process.Start(Path.GetFileNameWithoutExtension(loadedImageFilename));
+                Process.Start(Path.GetFileNameWithoutExtension(loadedImageFilename));
+            } else MessageBox.Show("Select an area before using this feature.");
         }
 
         private void btn_MergeIntoBMP_Click(object sender, RoutedEventArgs e) {

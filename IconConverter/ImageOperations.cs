@@ -26,9 +26,10 @@ namespace IconConverter {
             return Direction.NW;
         }
 
-        internal static void CropAndSave(string fileName, int dimension, System.Windows.Shapes.Rectangle rect, double scale, System.Windows.Controls.Image pictureBox) {
+        internal static void CropAndSave(MagickImage img, string fileName, int dimension, System.Windows.Shapes.Rectangle rect, double scale, System.Windows.Controls.Image pictureBox) {
             Directory.CreateDirectory(Path.GetFileNameWithoutExtension(fileName));
-            MagickImage img = new MagickImage(fileName);
+
+            img = new MagickImage(img);
 
             cropImage(img, rect, scale, pictureBox);
 
@@ -37,7 +38,7 @@ namespace IconConverter {
             img.Scale(new MagickGeometry(dimension) { IgnoreAspectRatio = true });
             Console.WriteLine(img.HasAlpha + " " + img.BitDepth());
             if (dimension == 256) {
-                if ((img.Format == MagickFormat.Jpeg || img.Format == MagickFormat.Jpg) && MessageBox.Show("Compact jpg into png .ico?", "", MessageBoxButton.OKCancel) == MessageBoxResult.OK) {
+                if ((img.Format == MagickFormat.Jpeg || img.Format == MagickFormat.Jpg) && MessageBox.Show("Compact into jpg .ico?", "", MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
                     IconFileWriter x = new IconFileWriter();
                     img.HasAlpha = true;
                     x.Images.Add(img.ToBitmap());
